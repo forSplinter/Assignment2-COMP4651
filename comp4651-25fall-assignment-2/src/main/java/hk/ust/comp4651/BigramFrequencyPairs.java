@@ -43,6 +43,7 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 		// Reuse objects to save overhead of object creation.
 		private static final IntWritable ONE = new IntWritable(1);
 		private static final PairOfStrings BIGRAM = new PairOfStrings();
+		private static final PairOfStrings MARGINAL = new PairOfStrings();
 
 		@Override
 		public void map(LongWritable key, Text value, Context context)
@@ -53,6 +54,28 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			for (int i = 0; i < words.length; i++){
+				if (words[i].isEmpty()) continue;
+				
+				
+				if (words[i].isEmpty()) continue;
+				String w1 = words[i];
+				
+				// E;it the Marginal count 
+				MARGINAL.set(w1, "*");
+				context.write(MARGINAL, ONE);
+				
+				// Emit the Bigram count for the numerator  
+				if (i < words.length - 1){
+					String w2 = words[i + 1];
+					if (w2.isEmpty()){
+						BIGRAM.set(w1, w2);
+						context.write(BIGRAM, ONE);
+					}
+				}
+				
+			}
+
 		}
 	}
 
