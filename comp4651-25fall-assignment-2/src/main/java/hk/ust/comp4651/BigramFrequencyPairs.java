@@ -87,6 +87,8 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 
 		// Reuse objects.
 		private final static FloatWritable VALUE = new FloatWritable();
+		private String currentWord = null;
+		private float marginalCount = 0.0f;
 
 		@Override
 		public void reduce(PairOfStrings key, Iterable<IntWritable> values,
@@ -94,6 +96,27 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			String leftElement = key.getLeftElement();
+			String rightElement = key.getRightElement();
+			
+			if("*".equals(rightElement)){
+				currentWord = leftElement;
+				marginalCount = 0.0f;
+				for (IntWritable value : values){
+					marginalCount += value.get();
+				}
+			}
+			else {
+				if (leftElement.equals(currentWord) && marginalCount > 0){
+					float bigramCount = 0.0f;
+					for (IntWritable value : values){
+						bigramCount += value.get();
+					}
+					float relativeFrequency = bigramCount / marginalCount;
+					VALUE.set(relativeFrequency);
+					context.write(key, VALUE);
+				}
+			}
 		}
 	}
 	
@@ -107,6 +130,13 @@ public class BigramFrequencyPairs extends Configured implements Tool {
 			/*
 			 * TODO: Your implementation goes here.
 			 */
+			int sum = 0;
+			for (IntWritable value : values){
+				sum += value.get();
+				
+			}
+			SUM.set(sum);
+			context.write(key, SUM);
 		}
 	}
 
